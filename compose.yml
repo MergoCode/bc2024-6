@@ -1,0 +1,11 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+      - "9229:9229"
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=development
+    command: npx nodemon --legacy-watch -- --inspect main.js -h localhost -p 3000 -c ./cache

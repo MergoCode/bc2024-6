@@ -3,6 +3,7 @@ const { Command } = require('commander');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const setupSwagger = require('./swagger'); // Імпорт Swagger конфігурації
 
 const program = new Command();
 
@@ -40,13 +41,16 @@ let notes = loadNotesFromFile();
 const app = express();
 app.use(express.json());
 const upload = multer();
+setupSwagger(app);
+
 
 app.get('/', (req, res) => {
-    res.send("Hello world!");
+    debugger;
+    res.send("Hello сука!");
 });
 
-const server = app.listen(options.port, options.host, () => {
-    console.log(`Server started at http://${options.host}:${options.port}`);
+const server = app.listen(options.port,  () => {
+    console.log(`Server shluha at http://${options.host}:${options.port}`);
 });
 
 server.on('error', (err) => {
@@ -65,6 +69,31 @@ app.get(`/notes/:name`, (req, res) => {
     
     res.send(note.text);
 });
+
+/**
+ * @swagger
+ * /notes/write:
+ *   post:
+ *     description: Create a new note
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - note_name
+ *             properties:
+ *               note_name:
+ *                 type: string
+ *               note:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Note created successfully
+ *       400:
+ *         description: Invalid request
+ */
 
 app.post('/notes/write', upload.fields([{ name: 'note_name' }, { name: 'note' }]), (req, res) => {
     const name = req.body.note_name;
@@ -90,11 +119,12 @@ app.post('/notes/write', upload.fields([{ name: 'note_name' }, { name: 'note' }]
     notes.push(newNote);
     saveNotesToFile(); 
     console.log(notes);
-
+    debugger;
     return res.status(201).send(newNote);
 });
 
 app.get('/notes', (req, res) => {
+    debugger;
     res.status(200).send(notes);
 });
 
@@ -128,7 +158,27 @@ app.delete('/delete/:name', (req, res) => {
         res.status(404).send("Note not found!");
     }
 });
-
+/**
+ * @swagger
+ * /UploadForm.html:
+ *   get:
+ *     summary: Get HTML-code for UploadForm
+ *     description: Returns HTML-code of Uploading Form.
+ *     responses:
+ *       200:
+ *         description: Form
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array    
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                   text:
+ *                     type: string
+ */
 app.get("/UploadForm.html", (req, res) => {
     res.status(200).sendFile(path.join(__dirname, "UploadForm.html"));
 
